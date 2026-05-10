@@ -18,6 +18,7 @@ All configuration is via environment variables (defaults shown):
 | `VNODES_PER_NODE` | Virtual nodes per physical node on the hash ring | `100` |
 | `PING_INTERVAL_SECONDS` | Seconds between health-check pings | `3` |
 | `MAX_TRIES` | Max healthy nodes to try per operation (`0` = try all virtual nodes) | `0` |
+| `REPLICATION_FACOTR` | Number of virtual nodes where the write will be replicated to | `3` |
 
 ## Quick start (Development)
 
@@ -32,6 +33,7 @@ REDIS_URLS="localhost:6379, localhost:6380, localhost:6381, localhost:6382"
 VNODES_PER_NODE=100
 PING_INTERVAL_SECONDS=3
 MAX_TRIES=0
+REPLICATION_FACTOR=3
 ```
 
 ```bash

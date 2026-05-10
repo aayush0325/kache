@@ -37,7 +37,9 @@ func Get(s []byte, ctx context.Context) ([]byte, error) {
 
 			res, err := client.Get(ctx, string(s)).Result()
 			if err != nil {
-				return nil, err
+				index = (index + 1) % len(coordinator.Ring)
+				tries++
+				continue
 			}
 
 			return []byte(res), nil

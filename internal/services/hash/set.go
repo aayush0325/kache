@@ -29,23 +29,29 @@ func Set(key string, val string, ttl uint64, ctx context.Context) error {
 	}
 
 	tries := 0
+	written := 0
 
-	for tries < maxTries {
+	for tries < maxTries && written < config.App.ReplicationFactor {
 		node := coordinator.Ring[index].ParentNode
 
 		if coordinator.GlobalState[node].IsHealthy {
 			client := coordinator.GlobalState[node].Client
 
-			_, err := client.Set(ctx, key, val, time.Duration(ttl)).Result()
+			_, err := client.Set(ctx, key, val, time.Duration(ttl)*time.Second).Result()
 			if err != nil {
-				return err
+				index = (index + 1) % len(coordinator.Ring)
+				tries++
+				continue
 			}
-
-			return nil
+			written++
 		}
 
 		index = (index + 1) % len(coordinator.Ring)
 		tries++
+	}
+
+	if written == config.App.ReplicationFactor {
+		return nil
 	}
 
 	return fmt.Errorf("no healthy nodes available")
