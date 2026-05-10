@@ -1,4 +1,4 @@
-# Consistent Hashing
+# Kache
 
 A distributed key-value store built on consistent hashing with automatic Redis node health monitoring.
 
