@@ -2,6 +2,7 @@ package coordinator
 
 import (
 	"fmt"
+	"log"
 	"sort"
 
 	"github.com/aayush0325/consistent-hashing/internal/config"
@@ -36,4 +37,6 @@ func createRing() {
 	sort.Slice(Ring, func(i, j int) bool {
 		return Ring[i].Hash < Ring[j].Hash
 	})
+
+	log.Printf("Hash ring created with %d virtual nodes", len(Ring))
 }

@@ -6,6 +6,7 @@ A distributed key-value store built on consistent hashing with automatic Redis n
 
 - **Consistent hash ring**: Each Redis server is represented by 100 virtual nodes placed on a hash ring using Murmur3. Keys are assigned to the nearest virtual node clockwise.
 - **Health monitoring**: A background goroutine pings all registered nodes every 3 seconds. Unhealthy nodes are skipped during reads/writes; the ring walks forward to the next healthy replica.
+- **Replication**: Data is replicated across `REPLICATION_FACTOR` nodes. To ensure low latency, the system returns immediately after the first successful write, while the remaining replications are performed asynchronously in the background.
 - **Failure recovery**: When a node comes back online, the coordinator re-establishes the Redis connection and marks it healthy, making it available for key operations again.
 
 ## Configuration
@@ -17,8 +18,8 @@ All configuration is via environment variables (defaults shown):
 | `REDIS_URLS` | Comma-separated Redis node addresses | `localhost:6379, localhost:6380, localhost:6381, localhost:6382` |
 | `VNODES_PER_NODE` | Virtual nodes per physical node on the hash ring | `100` |
 | `PING_INTERVAL_SECONDS` | Seconds between health-check pings | `3` |
-| `MAX_TRIES` | Max healthy nodes to try per operation (`0` = try all virtual nodes) | `0` |
-| `REPLICATION_FACOTR` | Number of virtual nodes where the write will be replicated to | `3` |
+| `MAX_TRIES` | Max healthy nodes to try per operation (`0` = try all virtual nodes) | `3` |
+| `REPLICATION_FACTOR` | Number of healthy nodes to replicate the data to (1 sync, N-1 async) | `3` |
 
 ## Quick start (Development)
 
