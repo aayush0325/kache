@@ -23,9 +23,34 @@ services:
       - "6382:6379"
     volumes:
       - redisdata-3:/data
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - REDIS_URLS=redis-0:6379,redis-1:6379,redis-2:6379,redis-3:6379
+      - VNODES_PER_NODE=100
+      - PING_INTERVAL_SECONDS=3
+      - MAX_TRIES=3
+      - REPLICATION_FACTOR=3
+    depends_on:
+      - redis-0
+      - redis-1
+      - redis-2
+      - redis-3
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - app
 
 volumes:
   redisdata-0:
   redisdata-1:
   redisdata-2:
   redisdata-3:
+  prometheus:

@@ -8,6 +8,7 @@ import (
 
 	"github.com/aayush0325/consistent-hashing/internal/config"
 	"github.com/aayush0325/consistent-hashing/internal/services/coordinator"
+	"github.com/aayush0325/consistent-hashing/internal/services/metrics"
 	"github.com/spaolacci/murmur3"
 )
 
@@ -45,10 +46,13 @@ func Set(key string, val string, ttl uint64, ctx context.Context) error {
 					log.Printf("Starting background replication for key %s", key)
 					go replicateAsync(key, val, ttl, (index+1)%len(coordinator.Ring), maxTries-tries-1)
 				}
+				metrics.M.IncCacheHit("set")
 				return nil
 			}
+			metrics.M.IncCacheMiss("set")
 			log.Printf("Failed to write key %s to node %s: %v", key, node, err)
 		} else {
+			metrics.M.IncCacheMiss("set")
 			log.Printf("Node %s is unhealthy, skipping", node)
 		}
 
@@ -86,4 +90,3 @@ func replicateAsync(key string, val string, ttl uint64, startIndex int, maxTries
 	}
 	log.Printf("Background replication for key %s finished. Written to %d additional nodes", key, written)
 }
-

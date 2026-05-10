@@ -7,6 +7,7 @@ import (
 
 	"github.com/aayush0325/consistent-hashing/internal/config"
 	"github.com/aayush0325/consistent-hashing/internal/services/coordinator"
+	"github.com/aayush0325/consistent-hashing/internal/services/metrics"
 	"github.com/spaolacci/murmur3"
 )
 
@@ -39,6 +40,7 @@ func Get(s []byte, ctx context.Context) ([]byte, error) {
 			log.Printf("Attempting to fetch key %s from node %s (try %d/%d)", string(s), node, tries+1, maxTries)
 			res, err := client.Get(ctx, string(s)).Result()
 			if err != nil {
+				metrics.M.IncCacheMiss("get")
 				log.Printf("Failed to fetch key %s from node %s: %v", string(s), node, err)
 				index = (index + 1) % len(coordinator.Ring)
 				tries++
@@ -46,8 +48,10 @@ func Get(s []byte, ctx context.Context) ([]byte, error) {
 			}
 
 			log.Printf("Successfully fetched key %s from node %s", string(s), node)
+			metrics.M.IncCacheHit("get")
 			return []byte(res), nil
 		} else {
+			metrics.M.IncCacheMiss("get")
 			log.Printf("Node %s is unhealthy, skipping", node)
 		}
 
