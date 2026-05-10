@@ -1,0 +1,31 @@
+services:
+  redis-0:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata-0:/data
+  redis-1:
+    image: redis:latest
+    ports:
+      - "6380:6379"
+    volumes:
+      - redisdata-1:/data
+  redis-2:
+    image: redis:latest
+    ports:
+      - "6381:6379"
+    volumes:
+      - redisdata-2:/data
+  redis-3:
+    image: redis:latest
+    ports:
+      - "6382:6379"
+    volumes:
+      - redisdata-3:/data
+
+volumes:
+  redisdata-0:
+  redisdata-1:
+  redisdata-2:
+  redisdata-3:

@@ -1,0 +1,12 @@
+# binary
+consistent-hashing
+
+# env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# Go
+vendor/
