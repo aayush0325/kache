@@ -2,12 +2,14 @@ package hash
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
 	"github.com/aayush0325/consistent-hashing/internal/config"
 	"github.com/aayush0325/consistent-hashing/internal/services/coordinator"
 	"github.com/aayush0325/consistent-hashing/internal/services/metrics"
+	"github.com/redis/go-redis/v9"
 	"github.com/spaolacci/murmur3"
 )
 
@@ -30,6 +32,7 @@ func Get(s []byte, ctx context.Context) ([]byte, error) {
 	}
 
 	tries := 0
+	allMissing := true
 
 	for tries < maxTries {
 		node := coordinator.Ring[index].ParentNode
@@ -42,6 +45,9 @@ func Get(s []byte, ctx context.Context) ([]byte, error) {
 			if err != nil {
 				metrics.M.IncCacheMiss("get")
 				log.Printf("Failed to fetch key %s from node %s: %v", string(s), node, err)
+				if !errors.Is(err, redis.Nil) {
+					allMissing = false
+				}
 				index = (index + 1) % len(coordinator.Ring)
 				tries++
 				continue
@@ -59,5 +65,8 @@ func Get(s []byte, ctx context.Context) ([]byte, error) {
 		tries++
 	}
 
+	if allMissing {
+		return nil, redis.Nil
+	}
 	return nil, fmt.Errorf("no healthy nodes available")
 }

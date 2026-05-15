@@ -20,7 +20,9 @@ func main() {
 
 	go coordinator.Background(ctx)
 
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
+	router.SetTrustedProxies(nil)
 
 	api := router.Group("/api/v1")
 	{
